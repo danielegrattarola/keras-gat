@@ -1,3 +1,4 @@
 *.pyc
 .idea/markdown-navigator.xml
 .idea/vcs.xml
+.idea/
