@@ -1,16 +1,13 @@
 from keras import backend as K
-import tensorflow as tf
-from keras.engine.topology import Layer, InputSpec
-from keras.layers import Dense, constraints, regularizers, initializers, \
-    activations
-import numpy as np
+from keras.engine.topology import Layer
+from keras.layers import constraints, regularizers, initializers, activations
 
 class GraphAttention(Layer):
 
     def __init__(self,
                  F_,
                  attention_heads=1,
-                 heads_combination='concat',  # ['concat', 'average']
+                 attention_heads_reduction='concat',  # ['concat', 'average']
                  activation='relu',
                  use_bias=False,
                  kernel_initializer='glorot_uniform',
@@ -21,12 +18,12 @@ class GraphAttention(Layer):
                  kernel_constraint=None,
                  bias_constraint=None,
                  **kwargs):
-        assert heads_combination in ['concat', 'average'], 'Possbile combination methods: \'concat\', \'average\''
-        self.F_ = F_
-        self.attention_heads = attention_heads  # K
-        self.heads_combination = heads_combination
-        self.activation = activations.get(activation)
-        self.use_bias = use_bias
+        assert attention_heads_reduction in ['concat', 'average'], 'Possbile reduction methods: \'concat\', \'average\''
+        self.F_ = F_  # Dimensionality of the output features (F' in the paper)
+        self.attention_heads = attention_heads  # Number of attention heads to run in parallel (K in the paper)
+        self.attention_heads_reduction = attention_heads_reduction  # 'concat' or 'average' (Equations 5 and 6 in the paper)
+        self.activation = activations.get(activation)  # Optional nonlinearity to apply to the weighted node features (Equation 4 in the paper)
+        self.use_bias = use_bias  # Not used in the paper, so it defaults to False
         self.kernel_initializer = initializers.get(kernel_initializer)
         self.bias_initializer = initializers.get(bias_initializer)
         self.kernel_regularizer = regularizers.get(kernel_regularizer)
@@ -34,22 +31,22 @@ class GraphAttention(Layer):
         self.activity_regularizer = regularizers.get(activity_regularizer)
         self.kernel_constraint = constraints.get(kernel_constraint)
         self.bias_constraint = constraints.get(bias_constraint)
-        self.input_spec = InputSpec(min_ndim=2)
         self.supports_masking = False
 
-        if heads_combination == 'concat':
-            self.output_dim = self.F_ * self.attention_heads  # Output will be K*F'
+        if attention_heads_reduction == 'concat':
+            self.output_dim = self.F_ * self.attention_heads  # Output will be KF'-dimensional
         else:
-            self.output_dim = self.f_  # Output will be F'
+            self.output_dim = self.F_  # Output will be F'-dimensional
 
         super(GraphAttention, self).__init__(**kwargs)
 
     def build(self, input_shape):
         assert len(input_shape) >= 2
-        input_dim = self.F = input_shape[-1]
+        input_dim = self.F = input_shape[0][-1]
 
-        self.kernels = []
-        self.biases = []
+        self.kernels = []  # Stores layer kernels for each attention head
+        self.attention_kernels = []  # Stores attention kernels for each attention heads
+        self.biases = []  # Stores biases for each attention head
         for head in range(self.attention_heads):
             kernel = self.add_weight(shape=(self.F, self.F_),
                                      initializer=self.kernel_initializer,
@@ -57,64 +54,69 @@ class GraphAttention(Layer):
                                      regularizer=self.kernel_regularizer,
                                      constraint=self.kernel_constraint)
             self.kernels.append(kernel)
+
+            attention_kernel = self.add_weight(shape=(2 * self.F_, 1),
+                                               initializer=self.kernel_initializer,
+                                               name='att_kernel_%s' % head,
+                                               regularizer=self.kernel_regularizer,
+                                               constraint=self.kernel_constraint)
+            self.attention_kernels.append(attention_kernel)
+
             if self.use_bias:
-                bias = self.add_weight(shape=(self.F_,),
-                                       initializer=self.bias_initializer,
-                                       name='bias_%s' % head,
-                                       regularizer=self.bias_regularizer,
-                                       constraint=self.bias_constraint)
+                raise NotImplementedError  # TODO
             else:
                 bias = None
             self.biases.append(bias)
-        self.input_spec = InputSpec(min_ndim=2, axes={-1: input_dim})
         super(GraphAttention, self).build(input_shape)
 
     def call(self, inputs):
-        X = inputs  # B x F
-        # TODO: N = inputs[1]  # B x F
+        X = inputs[0]  # input graph (B x F)
+        G = inputs[1]  # full graph (N x F) (this is necessary in code, but not in theory. Check section 2.2 of the paper)
         B = K.shape(X)[0]  # Get batch size at runtime
-        # TODO: N = K.shape(neighbors)[0]
+        N = K.shape(G)[0]  # Get number of nodes in the graph at runtime
 
-        outputs = []
+        outputs = []  # Will store the outputs of each attention head (B x F' or B x KF')
         for head in range(self.attention_heads):
-            kernel = self.kernels[head]
-            linear_transf = K.dot(X, kernel)  # B x F'
-            # TODO: linear_transformation of neighbors
-            # Repeat feature vectors: [[1], [2]] becomes [[1], [1], [2], [2]]
-            repeated = K.reshape(K.tile(linear_transf, [1, N]), (-1, self.F_))  # B*N x F'
+            kernel = self.kernels[head]  # W in the paper (F x F')
+            attention_kernel = self.attention_kernels[head]  # Attention network a in paper (2*F' x 1)
 
-            # TODO: tile feature vectors of neighbors B times
-            # Tile feature vectors of neighbors: [[1], [2]] becomes [[1], [2], [1], [2]]
-            tiled = K.tile(linear_transf, [B, 1])  # B*N x F'
+            # Compute inputs to attention network
+            linear_transf_X = K.dot(X, kernel)  # B x F'
+            linear_transf_G = K.dot(G, kernel)  # N x F'
 
+            # Repeat feature vectors of input: [[1], [2]] becomes [[1], [1], [2], [2]]
+            repeated = K.reshape(K.tile(linear_transf_X, [1, N]), (-1, self.F_))  # B*N x F'
+            # Tile feature vectors of full graph: [[1], [2]] becomes [[1], [2], [1], [2]]
+            tiled = K.tile(linear_transf_G, [B, 1])  # B*N x F'
             # Build combinations
             combinations = K.concatenate([repeated, tiled])  # N*B x 2F'
+            combination_slices = K.reshape(combinations, (B, -1, 2 * self.F_))  # B x N x 2F'
 
-            # Compute output features for each node in the batch
-            # TODO: change the for loop to a loop over tf.unstack(combinations)
-            combination_slices = tf.unstack(K.reshape(combinations, (B, -1, 2 * self.F_)))
-            output_features = []
-            for slice in combination_slices:
-                dense = Dense(1)(slice)  # N x 1 (basically "a(Wh_i, Wh_j)" in the paper)
-                # TODO: masking
-                e_i = K.reshape(dense, (1, -1))  # 1 x N (e_i in the paper)
-                softmax = K.squeeze(K.softmax(e_i))  # N (alpha_i in the paper)
-                softmax_broadcast = K.transpose(K.reshape(K.tile(softmax, [self.F_]), [self.F_, -1]))
-                node_features = K.sum(softmax_broadcast * linear_transf, axis=0)
-                if self.use_bias:
-                    output = K.bias_add(node_features, self.bias)
-                if self.heads_combination == 'concat' and self.activation is not None:
-                    node_features = self.activation(node_features)
-                output_features.append(node_features)
+            # Attention head
+            dense = K.dot(combination_slices, attention_kernel)  # B x N x 1 (a(Wh_i, Wh_j) in the paper)
+            dense = K.squeeze(dense, -1)  # B x N
+            dense = K.softmax(dense)  # B x N
 
-            output_features = K.stack(output_features)
-            outputs.append(output_features)
+            # TODO: masking with Vaswani method (add -inf to masked coefficients)
 
-        if self.heads_combination == 'concat':
+            # Linear combination with neighbors' features
+            node_features = K.dot(dense, linear_transf_G)  # B x F'
+
+            if self.use_bias:
+                raise NotImplementedError
+            if self.attention_heads_reduction == 'concat' and self.activation is not None:
+                # In the case of concatenation, we compute the activation here (Equation 5)
+                node_features = self.activation(node_features)
+
+            outputs.append(node_features)  # Add output of attention head to final output
+
+        # Reduce the attention heads output according to the reduction method
+        if self.attention_heads_reduction == 'concat':
             output = K.concatenate(outputs)
         else:
             output = K.mean(K.stack(outputs), axis=0)
             if self.activation is not None:
+                # In the case of mean reduction, we compute the activation now
                 output = self.activation(output)
 
         return output
