@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: keras-gat
+Version: 1.0
+Summary: A Keras implementation of the Graph Attention Network model by Veličković et. al
+Home-page: UNKNOWN
+Author: Daniele  Grattarola
+Author-email: daniele.grattarola@gmail.com
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN

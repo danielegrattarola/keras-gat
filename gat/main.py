@@ -16,7 +16,7 @@ X_train /= X_train.sum(1).reshape(-1, 1)
 
 # Convert adacency matrix to masking matrix for softmax (Vaswani et al., 2017)
 A_train = A_train.toarray()
-A_train[A_train == 0] = np.inf
+A_train[A_train == 0] = 1e09
 A_train[A_train == 1] = 0.0  # Connections are now valued 0, the rest is inf
 
 # Hyperparameters and constants
@@ -46,7 +46,7 @@ graph_attention_2 = GraphAttention(n_classes,
 
 # Build and compile the model
 model = Model(inputs=[X, G, A], outputs=graph_attention_2)
-model.compile(Adam(), 'categorical_crossentropy', metrics=['acc'])
+model.compile(Adam(lr=0.005), 'categorical_crossentropy', metrics=['acc'])
 model.summary()
 
 # Main training loop
