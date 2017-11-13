@@ -21,19 +21,19 @@ implementing this code for non-commercial reasons.
 You should cite the paper if you use any of this code for your research:
 ```
 @article{article,
-                author = {Veličković, Petar and Cucurull, Guillem and Casanova, Arantxa and Romero, Adriana and Liò, Pietro and Bengio, Y},
-                year = {2017},
-                month = {10},
-                pages = {},
-                title = {Graph Attention Networks}
+         author = {Veličković, Petar and Cucurull, Guillem and Casanova, Arantxa and Romero, Adriana and Liò, Pietro and Bengio, Y},
+         year = {2017},
+         month = {10},
+         pages = {},
+         title = {Graph Attention Networks}
 }
 ```
 Make also sure to give me credit by linking to this repo.
 
-I also copied the code in `utils.py` almost verbatim from [this repo by Thomas Kipf](https://github.com/tkipf/keras-gcn),
+I also copied the code in `utils.py` almost verbatim from [this repo by Thomas Kipf](https://github.com/tkipf/gcn),
 who I thank sincerely for sharing his work on GCNs and GAEs.
 The Cora dataset is also shamelessly copy-pasted from his repository
-(README.md and all), I hope I'm not breaking any licensing laws.
+(`README.md` and all), I hope I'm not breaking any licensing laws.
 
 ## Installation
 To install as a module:
@@ -48,9 +48,8 @@ $ python
 Or you can just copy and paste `graph_attention_layer.py` into your
 project.
 
-I tested this with Tensorflow 1.3.0 and Keras 2.0.6 on Python 2.7.12,
-and I don't provide support for any oher versions for now. I'll update
-my system to TF 1.4 soon, I promise.
+I tested this with Tensorflow 1.4.0 and Keras 2.0.9 on Python 2.7.12,
+and I don't provide support for any other versions for now.
 
 ## Graph Attention Networks
 I'm working on a blog post detailing how GATs work, so for now I'll
