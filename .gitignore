@@ -2,3 +2,5 @@
 .idea/markdown-navigator.xml
 .idea/vcs.xml
 .idea/
+*.egg-info
+

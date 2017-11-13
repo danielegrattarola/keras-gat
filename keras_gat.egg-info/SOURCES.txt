@@ -1,9 +1,0 @@
-gat/__init__.py
-gat/graph_attention_layer.py
-gat/main.py
-gat/utils.py
-keras_gat.egg-info/PKG-INFO
-keras_gat.egg-info/SOURCES.txt
-keras_gat.egg-info/dependency_links.txt
-keras_gat.egg-info/requires.txt
-keras_gat.egg-info/top_level.txt
