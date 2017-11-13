@@ -4,12 +4,11 @@ from keras.layers import Input, Dropout
 from keras.optimizers import Adam
 from keras.regularizers import l2
 from graph_attention_layer import GraphAttention
-from utils import load_data, get_splits, evaluate_preds
+from utils import load_data, evaluate_preds
 import numpy as np
 
 # Read data
-X_train, A_train, Y = load_data()
-Y_train, Y_val, Y_test, idx_train, idx_val, idx_test, train_mask = get_splits(Y)
+A_train, X_train, Y_train, Y_val, Y_test, idx_train, idx_val, idx_test = load_data('cora')
 
 # Normalize X
 X_train /= X_train.sum(1).reshape(-1, 1)
@@ -53,7 +52,7 @@ model.summary()
 for epoch in range(epochs):
     model.fit([X_train, X_train, A_train],
               Y_train,
-              sample_weight=train_mask,
+              sample_weight=idx_train.astype(int),
               epochs=1,
               batch_size=X_train.shape[0],
               verbose=0)
