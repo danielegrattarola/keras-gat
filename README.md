@@ -28,7 +28,10 @@ You should cite the paper if you use any of this code for your research:
          title = {Graph Attention Networks}
 }
 ```
-Make also sure to give me credit by linking to this repo.
+If you would like to give me credit, feel free to link to my
+[Github profile](https://github.com/danielegrattarola),
+[blog](https://danielegrattarola.github.io), or
+[Twitter](https://twitter.com/riceasphait).
 
 I also copied the code in `utils.py` almost verbatim from [this repo by Thomas Kipf](https://github.com/tkipf/gcn),
 who I thank sincerely for sharing his work on GCNs and GAEs.
