@@ -1,19 +1,18 @@
 # Keras Graph Attention Network
-This is a Keras implementation of the Graph Attention Network model
-presented by Veličković et. al (2017, https://arxiv.org/abs/1710.10903).
+This is a Keras implementation of the Graph Attention Network (GAT)
+model presented by Veličković et. al (2017, https://arxiv.org/abs/1710.10903).
 
 ## Premise
 This code implements the exact model and experimental setup described in
-the paper, but I haven't been able to reproduce their results yet.
+the paper, but I haven't been able to reproduce their exact results yet.
+I get really close, but I can't fit eight attention heads at the same
+time on my laptop's GPU.
 
-Part of the problem is that the memory requirements of the algorithm are
-in the order of O(V^2), where V is the number of nodes in the graph, so
-I am forced to run everything on the i7-7700HQ CPU of my laptop.
-**If you have GPU resources to spare, please let me know the results you
-get**.
 Ideally the model should reach a 83.5% accuracy on the Cora dataset,
 with the experimental setup described in the paper and implemented in
 the code (140 training nodes, 500 validation nodes, 1000 test nodes).
+If you manage to run the same setup of the paper, let me know your
+results.
 
 ## Disclaimer
 I have no affiliation with the authors of the paper and I am
@@ -33,19 +32,23 @@ If you would like to give me credit, feel free to link to my
 [blog](https://danielegrattarola.github.io), or
 [Twitter](https://twitter.com/riceasphait).
 
-I also copied the code in `utils.py` almost verbatim from [this repo by Thomas Kipf](https://github.com/tkipf/gcn),
-who I thank sincerely for sharing his work on GCNs and GAEs.
-The Cora dataset is also shamelessly copy-pasted from his repository
-(`README.md` and all), I hope I'm not breaking any licensing laws.
+I also copied the code in `utils.py` almost verbatim from [this repo by
+Thomas Kipf](https://github.com/tkipf/gcn), who I thank sincerely for
+sharing his work on GCNs and GAEs, and for giving me a few pointer on
+the data splits.
+
+I do not own the rights to the dataset distributed with this code, but
+they are widely available on the internet so it didn't feel wrong to
+share. If you have problems with this, feel free to contact me.
 
 ## Installation
 To install as a module:
 ```
 $ git clone https://github.com/danielegrattarola/keras-gat.git
-$ cd keras-get
+$ cd keras-gat
 $ pip install -e .
 $ python
->>> from gat import GraphAttention  # That's all you can import
+>>> from keras_gat import GraphAttention
 ```
 
 Or you can just copy and paste `graph_attention_layer.py` into your
@@ -54,23 +57,25 @@ project.
 I tested this with Tensorflow 1.4.0 and Keras 2.0.9 on Python 2.7.12,
 and I don't provide support for any other versions for now.
 
+**Note**: since version 1.1, the module only works with Tensorflow.
+Theano support is not planned in the near future.
+
+## Replicating experiments
+If you wish to replicate the experimental results of the paper, simply
+run:
+```sh
+$ python examples/gat.py
+```
+
+from the base folder.
+If you want to try and run it on a GPU or TPU, just comment out these
+lines (12 and 13) from the same file:
+```py
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = ''
+```
+
 ## Graph Attention Networks
-I'm working on a blog post detailing how GATs work, so for now I'll
-just put a schematic view of my GraphAttention implementation here below
-and leave the details for later.
-In this schematic:
-- N is the number of nodes in the graph
-- B is the number of nodes fed as input to the model; this detail is not
-implemented yet in the code, so B = N for now
-- F is the number of input node features
-- F' is the number of output node features
-- || indicates a sort of concatenation operation; why this operation
-yields a B x N x 2F' output is explained a bit better in the source code,
-and it's for purely practical reasons. Check out section 2.2 of the
-paper (right after the bullet points) for even more details.
-
-Note that for the sake of clarity I didn't explicitly represent
-different attention heads in parallel. Think of this whole diagram as an
-attention head on its own.
-
-![GraphAttention layer](GAT.png?raw=True)
+I'm working on a blog post explaining GATs, so [stay tuned](https://danielegrattarola.github.io).
+(Also, I lied and I'm not actually working on the post _RIGHT NOW_. But
+I'll get around to it, I promise).

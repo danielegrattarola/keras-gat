@@ -1,14 +1,17 @@
 from __future__ import print_function
+
 import scipy.sparse as sp
 import numpy as np
 import pickle as pkl
 import sys
 import networkx as nx
+import os
 
 """
 All functions are taken verbatim from https://github.com/tkipf/keras-gcn
 or https://github.com/tkipf/gcn
 """
+
 
 def parse_index_file(filename):
     """Parse index file."""
@@ -17,25 +20,31 @@ def parse_index_file(filename):
         index.append(int(line.strip()))
     return index
 
+
 def sample_mask(idx, l):
     """Create mask."""
     mask = np.zeros(l)
     mask[idx] = 1
     return np.array(mask, dtype=np.bool)
 
+
 def load_data(dataset_str):
     """Load data."""
+    FILE_PATH = os.path.abspath(__file__)
+    DIR_PATH = os.path.dirname(FILE_PATH)
+    DATA_PATH = os.path.join(DIR_PATH, 'data/')
+
     names = ['x', 'y', 'tx', 'ty', 'allx', 'ally', 'graph']
     objects = []
     for i in range(len(names)):
-        with open("data/ind.{}.{}".format(dataset_str, names[i]), 'rb') as f:
+        with open("{}ind.{}.{}".format(DATA_PATH, dataset_str, names[i]), 'rb') as f:
             if sys.version_info > (3, 0):
                 objects.append(pkl.load(f, encoding='latin1'))
             else:
                 objects.append(pkl.load(f))
 
     x, y, tx, ty, allx, ally, graph = tuple(objects)
-    test_idx_reorder = parse_index_file("data/ind.{}.test.index".format(dataset_str))
+    test_idx_reorder = parse_index_file("{}ind.{}.test.index".format(DATA_PATH, dataset_str))
     test_idx_range = np.sort(test_idx_reorder)
 
     if dataset_str == 'citeseer':
