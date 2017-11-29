@@ -24,7 +24,7 @@ F_ = 8  # Output dimension of first GraphAttention layer
 N = X_train.shape[0]  # Number of nodes in the graph
 n_classes = Y_train.shape[-1]  # Number of classes
 dropout_rate = 0.5  # Dropout rate applied to the input of GraphAttention layers
-epochs = 10  # Number of epochs to run for
+epochs = 200  # Number of epochs to run for
 
 # Model definition (as per Section 3.3 of the paper)
 X = Input(shape=(F, ))
@@ -48,6 +48,12 @@ model = Model(inputs=[X, G, A], outputs=graph_attention_2)
 model.compile(Adam(lr=0.005), 'categorical_crossentropy', metrics=['acc'])
 model.summary()
 
+# Helper variables for main training loop
+wait = 0
+preds = None
+best_val_acc = 0
+patience = 100
+
 # Main training loop
 for epoch in range(epochs):
     model.fit([X_train, X_train, A_train],
@@ -55,6 +61,7 @@ for epoch in range(epochs):
               sample_weight=idx_train.astype(int),
               epochs=1,
               batch_size=X_train.shape[0],
+              shuffle=False,
               verbose=0)
 
     # Test validation loss and accuray
@@ -68,7 +75,16 @@ for epoch in range(epochs):
           "train_acc= {:.4f}".format(train_val_acc[0]), \
           "val_loss= {:.4f}".format(train_val_loss[1]), \
           "val_acc= {:.4f}".format(train_val_acc[1])
-
+    
+    # Early stopping
+    if train_val_acc[1] > best_val_acc:
+        best_val_acc = train_val_acc[1]
+        wait = 0
+    else:
+        if wait >= patience:
+            print('Epoch {}: early stopping'.format(epoch))
+            break
+        wait += 1
 
 # Final testing
 preds = model.predict([X_train, X_train, A_train],
