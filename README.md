@@ -14,7 +14,7 @@ the code (140 training nodes, 500 validation nodes, 1000 test nodes).
 If you manage to run the same setup of the paper, let me know your
 results.
 
-## Disclaimer
+## Acknowledgements
 I have no affiliation with the authors of the paper and I am
 implementing this code for non-commercial reasons.
 You should cite the paper if you use any of this code for your research:
@@ -34,10 +34,10 @@ If you would like to give me credit, feel free to link to my
 
 I also copied the code in `utils.py` almost verbatim from [this repo by
 Thomas Kipf](https://github.com/tkipf/gcn), who I thank sincerely for
-sharing his work on GCNs and GAEs, and for giving me a few pointer on
+sharing his work on GCNs and GAEs, and for giving me a few pointers on
 the data splits.
 
-I do not own the rights to the dataset distributed with this code, but
+I do not own the rights to the datasets distributed with this code, but
 they are widely available on the internet so it didn't feel wrong to
 share. If you have problems with this, feel free to contact me.
 
