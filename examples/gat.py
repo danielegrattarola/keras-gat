@@ -36,7 +36,7 @@ A = Input(shape=(N, ))
 
 dropout1 = Dropout(dropout_rate)(X)
 graph_attention_1 = GraphAttention(F_,
-                                   attn_heads=8,
+                                   attn_heads=3,
                                    attn_heads_reduction='concat',
                                    activation='elu',
                                    kernel_regularizer=l2(l2_reg))([dropout1, A])

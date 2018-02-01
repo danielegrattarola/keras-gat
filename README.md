@@ -16,15 +16,22 @@ results.
 
 ## Acknowledgements
 I have no affiliation with the authors of the paper and I am
-implementing this code for non-commercial reasons.
-You should cite the paper if you use any of this code for your research:
+implementing this code for non-commercial reasons.  
+The authors published their official Tensorflow implementation 
+[here](https://github.com/PetarV-/GAT), so check it out for something that is 
+guaranteed to work as intended. From what I gather, their implementation is 
+slightly different than mine, so that may be something I will investigate in the 
+future.  
+You should also cite the paper if you use any of this code for your research:
 ```
-@article{article,
-         author = {Veličković, Petar and Cucurull, Guillem and Casanova, Arantxa and Romero, Adriana and Liò, Pietro and Bengio, Y},
-         year = {2017},
-         month = {10},
-         pages = {},
-         title = {Graph Attention Networks}
+@article{
+  velickovic2018graph,
+  title="{Graph Attention Networks}",
+  author={Veli{\v{c}}kovi{\'{c}}, Petar and Cucurull, Guillem and Casanova, Arantxa and Romero, Adriana and Li{\`{o}}, Pietro and Bengio, Yoshua},
+  journal={International Conference on Learning Representations},
+  year={2018},
+  url={https://openreview.net/forum?id=rJXMpikCZ},
+  note={Accepted as poster},
 }
 ```
 If you would like to give me credit, feel free to link to my
