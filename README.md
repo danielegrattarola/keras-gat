@@ -2,18 +2,6 @@
 This is a Keras implementation of the Graph Attention Network (GAT)
 model presented by Veličković et. al (2017, https://arxiv.org/abs/1710.10903).
 
-## Premise
-This code implements the exact model and experimental setup described in
-the paper, but I haven't been able to reproduce their exact results yet.
-I get really close, but I can't fit eight attention heads at the same
-time on my laptop's GPU.
-
-Ideally the model should reach a 83.5% accuracy on the Cora dataset,
-with the experimental setup described in the paper and implemented in
-the code (140 training nodes, 500 validation nodes, 1000 test nodes).
-If you manage to run the same setup of the paper, let me know your
-results.
-
 ## Acknowledgements
 I have no affiliation with the authors of the paper and I am
 implementing this code for non-commercial reasons.  
@@ -40,9 +28,16 @@ If you would like to give me credit, feel free to link to my
 [Twitter](https://twitter.com/riceasphait).
 
 I also copied the code in `utils.py` almost verbatim from [this repo by
-Thomas Kipf](https://github.com/tkipf/gcn), who I thank sincerely for
+Thomas Kipf](https://github.com/tkipf/gcn), whom I thank sincerely for
 sharing his work on GCNs and GAEs, and for giving me a few pointers on
 the data splits.
+
+A big thank you to [matthias-samwald](https://github.com/matthias-samwald), who 
+was able to run the full model on a better GPU than mine and report the 
+performance of the exact config described in the paper.  
+He got a 81.7% test accuracy, so pretty close to the 83.5% reported in the 
+paper (the difference in implementation w.r.t the authors' published code 
+might be playing a role here). 
 
 I do not own the rights to the datasets distributed with this code, but
 they are widely available on the internet so it didn't feel wrong to
