@@ -1,12 +1,13 @@
 from __future__ import division
 
-from keras_gat import GraphAttention
-from keras_gat.utils import load_data
-from keras.models import Model
+from keras.callbacks import EarlyStopping, TensorBoard
 from keras.layers import Input, Dropout
+from keras.models import Model
 from keras.optimizers import Adam
 from keras.regularizers import l2
-from keras.callbacks import EarlyStopping, TensorBoard
+
+from keras_gat import GraphAttention
+from keras_gat.utils import load_data
 
 # Read data
 A_train, X_train, Y_train, Y_val, Y_test, idx_train, idx_val, idx_test = load_data('cora')
