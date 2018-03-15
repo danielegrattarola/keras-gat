@@ -56,12 +56,6 @@ $ python
 Or you can just copy and paste `graph_attention_layer.py` into your
 project.
 
-I tested this with Tensorflow 1.4.0 and Keras 2.0.9 on Python 2.7.12,
-and I don't provide support for any other versions for now.
-
-**Note**: since version 1.1, the module only works with Tensorflow.
-Theano support is not planned in the near future.
-
 ## Replicating experiments
 If you wish to replicate the experimental results of the paper, simply
 run:

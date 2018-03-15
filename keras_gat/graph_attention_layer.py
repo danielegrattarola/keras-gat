@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 from keras import backend as K
-import tensorflow as tf
 from keras.engine.topology import Layer
 from keras.layers import constraints, regularizers, initializers, activations, Dropout, LeakyReLU
 
@@ -97,14 +96,14 @@ class GraphAttention(Layer):
             combination_slices = K.reshape(combinations, (N, -1, 2 * self.F_))  # (N x N x 2F')
 
             # Attention head
-            dense = K.squeeze(K.dot(combination_slices, attention_kernel), -1)  # a(Wh_i, Wh_j) in the paper (N x N x 1)
+            dense = K.squeeze(K.dot(combination_slices, attention_kernel), -1)  # a(Wh_i, Wh_j) in the paper (N x N)
 
             # add nonlinearty
             dense = LeakyReLU(alpha=0.2)(dense)
             
             # Mask values before activation (Vaswani et al., 2017)
-            comparison = tf.equal(A, tf.constant(0, dtype=tf.float32))
-            mask = tf.where(comparison, tf.ones_like(A) * -10e9, tf.zeros_like(A))
+            comparison = K.equal(A, K.constant(0.))
+            mask = K.switch(comparison, K.ones_like(A) * -10e9, K.zeros_like(A))
             masked = dense + mask
 
             # Feed masked values to softmax
