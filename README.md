@@ -36,6 +36,10 @@ A big thank you to [matthias-samwald](https://github.com/matthias-samwald),
 who was able to run the full model on a better GPU than mine and report
 the performance of the config described in the paper (see section below).
 
+Credits for commit f4974ac go to user [mawright](https://github.com/mawright) 
+who forked the code implementing attention to make it way more fast
+and memory efficient.
+
 ## Disclaimer
 I do not own any rights to the datasets distributed with this code, but
 they are publicly available at the following links:
