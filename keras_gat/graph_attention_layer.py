@@ -104,13 +104,8 @@ class GraphAttention(Layer):
             attn_for_neighs = K.dot(
                 linear_transf_X, attention_kernel[1])  # (N x 1), [a_2]^T [Wh_j]
 
-<<<<<<< HEAD
-            # Attention head
-            dense = K.squeeze(K.dot(combination_slices, attention_kernel), -1)  # a(Wh_i, Wh_j) in the paper (N x N)
-=======
             # Attention head a(Wh_i, Wh_j) = a^T [[Wh_i], [Wh_j]]
             dense = attn_for_self + K.transpose(attn_for_neighs)  # (N x N) via broadcasting
->>>>>>> 7ba65487591fb4795d6384540bd4f580e820ff61
 
             # add nonlinearty
             dense = LeakyReLU(alpha=0.2)(dense)
