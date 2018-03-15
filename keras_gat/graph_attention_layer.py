@@ -10,7 +10,7 @@ class GraphAttention(Layer):
     def __init__(self,
                  F_,
                  attn_heads=1,
-                 attn_heads_reduction='concat',  # ['concat', 'average']
+                 attn_heads_reduction='concat',  # {'concat', 'average'}
                  attn_dropout=0.5,
                  activation='relu',
                  kernel_initializer='glorot_uniform',
@@ -21,8 +21,8 @@ class GraphAttention(Layer):
                  kernel_constraint=None,
                  att_kernel_constraint=None,
                  **kwargs):
-        assert attn_heads_reduction in ['concat', 'average'], \
-            'Possbile reduction methods: \'concat\', \'average\''
+        if attn_heads_reduction not in {'concat', 'average'}:
+            raise ValueError('Possbile reduction methods: concat, average')
 
         self.F_ = F_  # Number of output features (F' in the paper)
         self.attn_heads = attn_heads  # Number of attention heads (K in the paper)
@@ -39,7 +39,7 @@ class GraphAttention(Layer):
         self.supports_masking = False
 
         # Populated by build()
-        self.kernels = []  # Layer kernels for attention heads
+        self.kernels = []       # Layer kernels for attention heads
         self.attn_kernels = []  # Attention kernels for attention heads
 
         if attn_heads_reduction == 'concat':
@@ -66,20 +66,17 @@ class GraphAttention(Layer):
             self.kernels.append(kernel)
 
             # Attention kernel
-            attention_kernel_self = self.add_weight(
-                shape=(self.F_, 1),
-                initializer=self.attn_kernel_initializer,
-                name='att_kernel_%s' % head,
-                regularizer=self.attn_kernel_regularizer,
-                constraint=self.attn_kernel_constraint)
-            attention_kernel_neighs = self.add_weight(
-                shape=(self.F_, 1),
-                initializer=self.attn_kernel_initializer,
-                name='att_kernel_%s' % head,
-                regularizer=self.attn_kernel_regularizer,
-                constraint=self.attn_kernel_constraint)
-            self.attn_kernels.append([
-                attention_kernel_self, attention_kernel_neighs])
+            attn_kernel_self = self.add_weight(shape=(self.F_, 1),
+                                               initializer=self.attn_kernel_initializer,
+                                               name='att_kernel_{}'.format(head),
+                                               regularizer=self.attn_kernel_regularizer,
+                                               constraint=self.attn_kernel_constraint)
+            attn_kernel_neighs = self.add_weight(shape=(self.F_, 1),
+                                                 initializer=self.attn_kernel_initializer,
+                                                 name='att_kernel_{}'.format(head),
+                                                 regularizer=self.attn_kernel_regularizer,
+                                                 constraint=self.attn_kernel_constraint)
+            self.attn_kernels.append([attn_kernel_self, attn_kernel_neighs])
         self.built = True
 
     def call(self, inputs):
@@ -99,15 +96,13 @@ class GraphAttention(Layer):
 
             # Compute feature combinations
             # Note: [[a_1], [a_2]]^T [[Wh_i], [Wh_2]] = [a_1]^T [Wh_i] + [a_2]^T [Wh_j]
-            attn_for_self = K.dot(
-                linear_transf_X, attention_kernel[0])  # (N x 1), [a_1]^T [Wh_i]
-            attn_for_neighs = K.dot(
-                linear_transf_X, attention_kernel[1])  # (N x 1), [a_2]^T [Wh_j]
+            attn_for_self = K.dot(linear_transf_X, attention_kernel[0])    # (N x 1), [a_1]^T [Wh_i]
+            attn_for_neighs = K.dot(linear_transf_X, attention_kernel[1])  # (N x 1), [a_2]^T [Wh_j]
 
             # Attention head a(Wh_i, Wh_j) = a^T [[Wh_i], [Wh_j]]
             dense = attn_for_self + K.transpose(attn_for_neighs)  # (N x N) via broadcasting
 
-            # add nonlinearty
+            # Add nonlinearty
             dense = LeakyReLU(alpha=0.2)(dense)
 
             # Mask values before activation (Vaswani et al., 2017)
