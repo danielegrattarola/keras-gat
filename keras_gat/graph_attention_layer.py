@@ -66,12 +66,20 @@ class GraphAttention(Layer):
             self.kernels.append(kernel)
 
             # Attention kernel
-            attention_kernel = self.add_weight(shape=(2 * self.F_, 1),
-                                               initializer=self.attn_kernel_initializer,
-                                               name='att_kernel_%s' % head,
-                                               regularizer=self.attn_kernel_regularizer,
-                                               constraint=self.attn_kernel_constraint)
-            self.attn_kernels.append(attention_kernel)
+            attention_kernel_self = self.add_weight(
+                shape=(self.F_, 1),
+                initializer=self.attn_kernel_initializer,
+                name='att_kernel_%s' % head,
+                regularizer=self.attn_kernel_regularizer,
+                constraint=self.attn_kernel_constraint)
+            attention_kernel_neighs = self.add_weight(
+                shape=(self.F_, 1),
+                initializer=self.attn_kernel_initializer,
+                name='att_kernel_%s' % head,
+                regularizer=self.attn_kernel_regularizer,
+                constraint=self.attn_kernel_constraint)
+            self.attn_kernels.append([
+                attention_kernel_self, attention_kernel_neighs])
         self.built = True
 
     def call(self, inputs):
@@ -90,24 +98,30 @@ class GraphAttention(Layer):
             linear_transf_X = K.dot(X, kernel)  # (N x F')
 
             # Compute feature combinations
-            repeated = K.reshape(K.tile(linear_transf_X, [1, N]), (N * N, self.F_))  # (N^2 x F')
-            tiled = K.tile(linear_transf_X, [N, 1])  # (N^2 x F')
-            combinations = K.concatenate([repeated, tiled])  # (N^2 x 2F')
-            combination_slices = K.reshape(combinations, (N, -1, 2 * self.F_))  # (N x N x 2F')
+            # Note: [[a_1], [a_2]]^T [[Wh_i], [Wh_2]] = [a_1]^T [Wh_i] + [a_2]^T [Wh_j]
+            attn_for_self = K.dot(
+                linear_transf_X, attention_kernel[0])  # (N x 1), [a_1]^T [Wh_i]
+            attn_for_neighs = K.dot(
+                linear_transf_X, attention_kernel[1])  # (N x 1), [a_2]^T [Wh_j]
 
+<<<<<<< HEAD
             # Attention head
             dense = K.squeeze(K.dot(combination_slices, attention_kernel), -1)  # a(Wh_i, Wh_j) in the paper (N x N)
+=======
+            # Attention head a(Wh_i, Wh_j) = a^T [[Wh_i], [Wh_j]]
+            dense = attn_for_self + K.transpose(attn_for_neighs)  # (N x N) via broadcasting
+>>>>>>> 7ba65487591fb4795d6384540bd4f580e820ff61
 
             # add nonlinearty
             dense = LeakyReLU(alpha=0.2)(dense)
-            
+
             # Mask values before activation (Vaswani et al., 2017)
             comparison = K.equal(A, K.constant(0.))
             mask = K.switch(comparison, K.ones_like(A) * -10e9, K.zeros_like(A))
             masked = dense + mask
 
             # Feed masked values to softmax
-            softmax = K.softmax(masked)  # (N x N)
+            softmax = K.softmax(masked)  # (N x N), attention coefficients
             dropout = Dropout(self.attn_dropout)(softmax)  # (N x N)
 
             # Linear combination with neighbors' features
