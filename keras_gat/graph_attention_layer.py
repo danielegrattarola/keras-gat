@@ -19,7 +19,7 @@ class GraphAttention(Layer):
                  attn_kernel_regularizer=None,
                  activity_regularizer=None,
                  kernel_constraint=None,
-                 att_kernel_constraint=None,
+                 attn_kernel_constraint=None,
                  **kwargs):
         if attn_heads_reduction not in {'concat', 'average'}:
             raise ValueError('Possbile reduction methods: concat, average')
@@ -35,7 +35,7 @@ class GraphAttention(Layer):
         self.attn_kernel_regularizer = regularizers.get(attn_kernel_regularizer)
         self.activity_regularizer = regularizers.get(activity_regularizer)
         self.kernel_constraint = constraints.get(kernel_constraint)
-        self.attn_kernel_constraint = constraints.get(att_kernel_constraint)
+        self.attn_kernel_constraint = constraints.get(attn_kernel_constraint)
         self.supports_masking = False
 
         # Populated by build()

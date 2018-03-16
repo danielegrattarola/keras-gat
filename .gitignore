@@ -1,6 +1,5 @@
-*.pyc
-.idea/markdown-navigator.xml
-.idea/vcs.xml
 .idea/
-*.egg-info
+__pycache__/
 logs/
+*.egg-info
+*.pyc
