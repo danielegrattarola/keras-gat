@@ -77,7 +77,7 @@ from the base folder.
 
 [matthias-samwald](https://github.com/matthias-samwald) got a 81.7% test
 accuracy with v1.1, so pretty close to the 83.5% reported by the authors
-(the difference in implementation w.r.t the authors might be responsible).
+(the difference in implementation w.r.t the authors might be responsible).  
 [vermaMachineLearning](https://github.com/vermaMachineLearning) was
 finally able to get an 83.5% by correctly adding self-loops to the input
 graph. Since commit f4974ac (v1.3), the example script should replicate
