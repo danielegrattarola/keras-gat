@@ -1,6 +1,6 @@
 # Keras Graph Attention Network
 This is a Keras implementation of the Graph Attention Network (GAT)
-model presented by Veličković et. al (2017, https://arxiv.org/abs/1710.10903).
+model by Veličković et. al (2017, https://arxiv.org/abs/1710.10903).
 
 ## Acknowledgements
 I have no affiliation with the authors of the paper and I am
@@ -40,6 +40,11 @@ Credits for commit f4974ac go to user [mawright](https://github.com/mawright)
 who forked the code implementing attention to make it way more fast
 and memory efficient.
 
+I also thank [vermaMachineLearning](https://github.com/vermaMachineLearning)
+for suggesting the edits of commit 7959bd8, which made the layer 4 times
+faster and finally brought the test accuracy to the same values reported
+in the paper.
+
 ## Disclaimer
 I do not own any rights to the datasets distributed with this code, but
 they are publicly available at the following links:
@@ -73,20 +78,7 @@ from the base folder.
 [matthias-samwald](https://github.com/matthias-samwald) got a 81.7% test
 accuracy with v1.1, so pretty close to the 83.5% reported by the authors
 (the difference in implementation w.r.t the authors might be responsible).
-Since version 1.2 the code is much more efficient and fits even on the
-GTX 1050 of my laptop. I ran the same setup of the paper and got a test
-accuracy of up to 81.9% after 263 epochs.
-
-| Metric           | Value | Epoch |
-|:-----------------|:-----:|:-----:|
-| Final train loss |1.1704 |263    |
-| Final train acc  |0.8429 |263    |
-| Best val loss    |1.3501 |263    |
-| Best val acc     |0.7980 |163    |
-| Best test loss   |1.3156 |263    |
-| Best test acc    |0.8199 |263    |
-
-## Graph Attention Networks
-I'm working on a blog post explaining GATs, so [stay tuned](https://danielegrattarola.github.io).
-(Also, I lied and I'm not actually working on the post _RIGHT NOW_. But
-I'll get around to it, I promise).
+[vermaMachineLearning](https://github.com/vermaMachineLearning) was
+finally able to get an 83.5% by correctly adding self-loops to the input
+graph. Since commit f4974ac (v1.3), the example script should replicate
+the results of the paper.
