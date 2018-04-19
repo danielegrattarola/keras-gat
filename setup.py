@@ -4,11 +4,10 @@ setup(
     name='keras_gat',
     version='1.3',
     packages=['keras_gat'],
-    install_requires=['keras'],  # Also requires tensorflow, but I don't want to mess up people's installs
-    url='',
-    license='',
-    author='Daniele  Grattarola',
+    install_requires=['keras'],
+    url='https://github.com/danielegrattarola/keras-gat',
+    license='MIT',
+    author='Daniele Grattarola',
     author_email='daniele.grattarola@gmail.com',
-    description='A Keras implementation of the Graph Attention Network model by'
-                ' Velickovic et. al'
+    description='A Keras implementation of the Graph Attention Network by Velickovic et. al'
 )
