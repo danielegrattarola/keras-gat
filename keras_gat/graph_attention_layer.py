@@ -106,8 +106,7 @@ class GraphAttention(Layer):
             dense = LeakyReLU(alpha=0.2)(dense)
 
             # Mask values before activation (Vaswani et al., 2017)
-            comparison = K.equal(A, K.constant(0.))
-            mask = K.switch(comparison, K.ones_like(A) * -10e9, K.zeros_like(A))
+            mask = K.exp(A * -10e9) * -10e9
             masked = dense + mask
 
             # Feed masked values to softmax
