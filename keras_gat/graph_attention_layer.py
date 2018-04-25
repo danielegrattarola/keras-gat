@@ -83,9 +83,6 @@ class GraphAttention(Layer):
         X = inputs[0]  # Node features (N x F)
         A = inputs[1]  # Adjacency matrix (N x N)
 
-        # Parameters
-        N = K.shape(X)[0]  # Number of nodes in the graph
-
         outputs = []
         for head in range(self.attn_heads):
             kernel = self.kernels[head]  # W in the paper (F x F')
