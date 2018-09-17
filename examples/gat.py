@@ -1,7 +1,7 @@
 from __future__ import division
 import numpy as np
 
-from keras.callbacks import EarlyStopping, TensorBoard
+from keras.callbacks import EarlyStopping, TensorBoard, ModelCheckpoint
 from keras.layers import Input, Dropout
 from keras.models import Model
 from keras.optimizers import Adam
@@ -57,6 +57,8 @@ model.summary()
 # Callbacks
 es_callback = EarlyStopping(monitor='val_weighted_acc', patience=es_patience)
 tb_callback = TensorBoard(batch_size=N)
+mc_callback = ModelCheckpoint('best_model.h5', save_best_only=True,
+                              save_weights_only=True)
 
 # Train model
 validation_data = ([X, A], Y_val, idx_val)
@@ -67,7 +69,10 @@ model.fit([X, A],
           batch_size=N,
           validation_data=validation_data,
           shuffle=False,  # Shuffling data means shuffling the whole graph
-          callbacks=[es_callback, tb_callback])
+          callbacks=[es_callback, tb_callback, mc_callback])
+
+# Load best model
+model.load_weights('best_model.h5')
 
 # Evaluate model
 eval_results = model.evaluate([X, A],
