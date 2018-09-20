@@ -1,16 +1,12 @@
 from __future__ import print_function
 
-import scipy.sparse as sp
-import numpy as np
+import os
 import pickle as pkl
 import sys
-import networkx as nx
-import os
 
-"""
-All functions are taken verbatim from https://github.com/tkipf/keras-gcn
-or https://github.com/tkipf/gcn
-"""
+import networkx as nx
+import numpy as np
+import scipy.sparse as sp
 
 
 def parse_index_file(filename):
@@ -50,12 +46,13 @@ def load_data(dataset_str):
     if dataset_str == 'citeseer':
         # Fix citeseer dataset (there are some isolated nodes in the graph)
         # Find isolated nodes, add them as zero-vecs into the right position
-        test_idx_range_full = range(min(test_idx_reorder), max(test_idx_reorder)+1)
+        test_idx_range_full = range(min(test_idx_reorder),
+                                    max(test_idx_reorder) + 1)
         tx_extended = sp.lil_matrix((len(test_idx_range_full), x.shape[1]))
-        tx_extended[test_idx_range-min(test_idx_range), :] = tx
+        tx_extended[test_idx_range - min(test_idx_range), :] = tx
         tx = tx_extended
         ty_extended = np.zeros((len(test_idx_range_full), y.shape[1]))
-        ty_extended[test_idx_range-min(test_idx_range), :] = ty
+        ty_extended[test_idx_range - min(test_idx_range), :] = ty
         ty = ty_extended
 
     features = sp.vstack((allx, tx)).tolil()
@@ -67,7 +64,7 @@ def load_data(dataset_str):
 
     idx_test = test_idx_range.tolist()
     idx_train = range(len(y))
-    idx_val = range(len(y), len(y)+500)
+    idx_val = range(len(y), len(y) + 500)
 
     train_mask = sample_mask(idx_train, labels.shape[0])
     val_mask = sample_mask(idx_val, labels.shape[0])
@@ -83,20 +80,11 @@ def load_data(dataset_str):
     return adj, features, y_train, y_val, y_test, train_mask, val_mask, test_mask
 
 
-def categorical_crossentropy(preds, labels):
-    return np.mean(-np.log(np.extract(labels, preds)))
-
-
-def accuracy(preds, labels):
-    return np.mean(np.equal(np.argmax(labels, 1), np.argmax(preds, 1)))
-
-
-def evaluate_preds(preds, labels, indices):
-    split_loss = list()
-    split_acc = list()
-
-    for y_split, idx_split in zip(labels, indices):
-        split_loss.append(categorical_crossentropy(preds[idx_split], y_split[idx_split]))
-        split_acc.append(accuracy(preds[idx_split], y_split[idx_split]))
-
-    return split_loss, split_acc
+def preprocess_features(features):
+    """Row-normalize feature matrix and convert to tuple representation"""
+    rowsum = np.array(features.sum(1))
+    r_inv = np.power(rowsum, -1).flatten()
+    r_inv[np.isinf(r_inv)] = 0.
+    r_mat_inv = sp.diags(r_inv)
+    features = r_mat_inv.dot(features)
+    return features.todense()

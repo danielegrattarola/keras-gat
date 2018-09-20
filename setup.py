@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='keras_gat',
-    version='1.3',
+    version='1.4',
     packages=['keras_gat'],
     install_requires=['keras'],
     url='https://github.com/danielegrattarola/keras-gat',
