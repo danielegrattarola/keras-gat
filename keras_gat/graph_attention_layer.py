@@ -140,10 +140,6 @@ class GraphAttention(Layer):
             if self.use_bias:
                 node_features = K.bias_add(node_features, self.biases[head])
 
-            if self.attn_heads_reduction == 'concat':
-                # If 'concat', compute the activation here (Eq. 5)
-                node_features = self.activation(node_features)
-
             # Add output of attention head to final output
             outputs.append(node_features)
 
@@ -152,9 +148,8 @@ class GraphAttention(Layer):
             output = K.concatenate(outputs)  # (N x KF')
         else:
             output = K.mean(K.stack(outputs), axis=0)  # N x F')
-            # If 'average', compute the activation here (Eq. 6)
-            output = self.activation(output)
 
+        output = self.activation(output)
         return output
 
     def compute_output_shape(self, input_shape):
