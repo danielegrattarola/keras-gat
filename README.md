@@ -2,8 +2,7 @@
 
 |**DEPRECATED**|
 |:------------|
-| This implementation of GAT is no longer actively maintained and may not work with modern versions of Tensorflow and Keras.  
-Check out [Spektral](https:graphneural.network) and its [GAT example](https://github.com/danielegrattarola/spektral/blob/master/examples/node_prediction/citation_gat.py) for a Tensorflow/Keras implementation of GAT.| 
+| This implementation of GAT is no longer actively maintained and may not work with modern versions of Tensorflow and Keras. Check out [Spektral](https://graphneural.network) and its [GAT example](https://github.com/danielegrattarola/spektral/blob/master/examples/node_prediction/citation_gat.py) for a Tensorflow/Keras implementation of GAT.| 
 
 This is a Keras implementation of the Graph Attention Network (GAT) model by Veličković et al. (2017, [[arXiv link]](https://arxiv.org/abs/1710.10903)).
 
